@@ -1,161 +1,195 @@
-#include <iostream>
 
+#include <iostream>
+#include <cctype>
 using namespace std;
 
-int MyStrLen(const char* string)
+int mystrlen(const char* str)
 {
     int length = 0;
-    while (string[length] != '\0') length++;
+    while (str[length] != '\0')
+        length++;
     return length;
 }
 
-char* MyStrCpy(char* destination, const char* source)
+char* mystrcpy(char* str1, const char* str2)
 {
-    int index = 0;
-    do
+    int i = 0;
+    while (str2[i] != '\0')
     {
-        destination[index] = source[index];
-        index++;
-    } while (source[index - 1] != '\0');
-    return destination;
+        str1[i] = str2[i];
+        i++;
+    }
+    str1[i] = '\0';
+    return str1;
 }
 
-char* MyStrCat(char* destination, const char* source)
+char* mystrcat(char* str1, const char* str2)
 {
-    int destinationLength = MyStrLen(destination);
-    int sourceIndex = 0;
-    do
-    {
-        destination[destinationLength + sourceIndex] = source[sourceIndex];
-        sourceIndex++;
-    } while (source[sourceIndex - 1] != '\0');
-    return destination;
+    int i = mystrlen(str1);
+    int j = 0;
+
+    while (str2[j] != '\0')
+        str1[i++] = str2[j++];
+
+    str1[i] = '\0';
+    return str1;
 }
 
-char* MyStrChr(char* string, char symbol)
+char* mystrchr(char* str, char symbol)
 {
     for (int i = 0; ; i++)
     {
-        if (string[i] == symbol) return string + i;
-        if (string[i] == '\0') return 0;
+        if (str[i] == symbol)
+            return str + i;
+
+        if (str[i] == '\0')
+            return nullptr;
     }
 }
 
-char* MyStrStr(char* string, const char* substring)
+char* mystrstr(char* str1, char* str2)
 {
-    if (substring[0] == '\0') return string;
+    if (str2[0] == '\0')
+        return str1;
 
-    for (int i = 0; string[i] != '\0'; i++)
+    for (int i = 0; str1[i] != '\0'; i++)
     {
         int j = 0;
-        while (substring[j] != '\0' && string[i + j] == substring[j]) j++;
-        if (substring[j] == '\0') return string + i;
+
+        while (str1[i + j] != '\0' &&
+            str2[j] != '\0' &&
+            str1[i + j] == str2[j])
+        {
+            j++;
+        }
+
+        if (str2[j] == '\0')
+            return str1 + i;
     }
-    return 0;
+
+    return nullptr;
 }
 
-bool IsLetter(char symbol)
+void ReplaceSpaces(char* str)
 {
-    return (symbol >= 'A' && symbol <= 'Z') || (symbol >= 'a' && symbol <= 'z');
+    for (int i = 0; str[i] != '\0'; i++)
+    {
+        if (str[i] == ' ')
+            str[i] = '\t';
+    }
 }
 
-bool IsDigit(char symbol)
+void CountCharacters(const char* str, int& letters, int& digits, int& others)
 {
-    return symbol >= '0' && symbol <= '9';
+    letters = 0;
+    digits = 0;
+    others = 0;
+
+    for (int i = 0; str[i] != '\0'; i++)
+    {
+        unsigned char ch = static_cast<unsigned char>(str[i]);
+
+        if (isalpha(ch))
+            letters++;
+        else if (isdigit(ch))
+            digits++;
+        else
+            others++;
+    }
+}
+
+int CountWords(const char* str)
+{
+    int count = 0;
+    bool inWord = false;
+
+    for (int i = 0; str[i] != '\0'; i++)
+    {
+        unsigned char ch = static_cast<unsigned char>(str[i]);
+
+        if (isspace(ch))
+        {
+            inWord = false;
+        }
+        else if (!inWord)
+        {
+            count++;
+            inWord = true;
+        }
+    }
+
+    return count;
+}
+
+bool IsPalindrome(const char* str)
+{
+    int left = 0;
+    int right = mystrlen(str) - 1;
+
+    while (left < right)
+    {
+        if (str[left] != str[right])
+            return false;
+
+        left++;
+        right--;
+    }
+
+    return true;
 }
 
 int main()
 {
+    char str[256];
 
+    cout << "Enter string: ";
+    cin.getline(str, 256);
 
     // Task 1
-    {
-        char text[256];
-        cout << "Enter a line: ";
-        cin.getline(text, 256);
+    char modified[256];
+    mystrcpy(modified, str);
+    ReplaceSpaces(modified);
 
-        for (int i = 0; text[i] != '\0'; i++)
-        {
-            if (text[i] == ' ') text[i] = '\t';
-        }
-        cout << text << '\n';
-    }
+    cout << "With tabs: " << modified << '\n';
 
     // Task 2
-    {
-        char text[256];
-        int letters = 0;
-        int digits = 0;
-        int other = 0;
+    int letters, digits, others;
+    CountCharacters(str, letters, digits, others);
 
-        cout << "Enter a line: ";
-        cin.getline(text, 256);
-
-        for (int i = 0; text[i] != '\0'; i++)
-        {
-            if (IsLetter(text[i])) letters++;
-            else if (IsDigit(text[i])) digits++;
-            else other++;
-        }
-
-        cout << "Letters: " << letters << "\nDigits: " << digits
-            << "\nOther: " << other << '\n';
-    }
+    cout << "Letters: " << letters << '\n';
+    cout << "Digits: " << digits << '\n';
+    cout << "Other symbols: " << others << '\n';
 
     // Task 3
-    {
-        char sentence[256];
-        int wordCount = 0;
-        bool insideWord = false;
-
-        cout << "Enter a sentence: ";
-        cin.getline(sentence, 256);
-
-        for (int i = 0; sentence[i] != '\0'; i++)
-        {
-            if (sentence[i] != ' ' && sentence[i] != '\t')
-            {
-                if (!insideWord) wordCount++;
-                insideWord = true;
-            }
-            else
-            {
-                insideWord = false;
-            }
-        }
-        cout << "Words: " << wordCount << '\n';
-    }
+    cout << "Words: " << CountWords(str) << '\n';
 
     // Task 4
-    {
-        char text[256];
-        cout << "Enter a line: ";
-        cin.getline(text, 256);
-
-        int length = MyStrLen(text);
-        bool palindrome = true;
-        for (int i = 0; i < length / 2; i++)
-        {
-            if (text[i] != text[length - 1 - i]) palindrome = false;
-        }
-        cout << (palindrome ? "Palindrome\n" : "Not a palindrome\n");
-    }
+    if (IsPalindrome(str))
+        cout << "Palindrome\n";
+    else
+        cout << "Not palindrome\n";
 
     // Task 5
-    {
-        char first[256] = "Hello";
-        char second[256];
+    char buffer[512];
+    mystrcpy(buffer, str);
 
-        MyStrCpy(second, first);
-        MyStrCat(second, " world");
+    cout << "Length: " << mystrlen(buffer) << '\n';
+    cout << "Copied: " << buffer << '\n';
 
-        cout << "Length: " << MyStrLen(second) << '\n';
-        cout << "Copy and concatenation: " << second << '\n';
+    mystrcat(buffer, " example");
+    cout << "Concatenated: " << buffer << '\n';
 
-        char* symbolPosition = MyStrChr(second, 'w');
-        char* substringPosition = MyStrStr(second, "world");
-        cout << "Symbol position: " << (symbolPosition == 0 ? -1 : symbolPosition - second) << '\n';
-        cout << "Substring position: " << (substringPosition == 0 ? -1 : substringPosition - second) << '\n';
-    }
-    return 0;
+    char* foundChar = mystrchr(buffer, 'a');
+    if (foundChar != nullptr)
+        cout << "Character index: " << foundChar - buffer << '\n';
+    else
+        cout << "Character not found\n";
+
+    char substring[] = "example";
+    char* foundSubstring = mystrstr(buffer, substring);
+
+    if (foundSubstring != nullptr)
+        cout << "Substring index: " << foundSubstring - buffer << '\n';
+    else
+        cout << "Substring not found\n";
 }
